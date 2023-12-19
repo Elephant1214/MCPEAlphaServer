@@ -1,6 +1,6 @@
 package me.elephant1214.mcpeas.world.generation
 
-class FlatGenerator : IWorldGenerator {
+class FlatGenerator : WorldGenerator {
     override fun generateChunkColumn(chunkKey: Long) {
         TODO("Not yet implemented")
     }

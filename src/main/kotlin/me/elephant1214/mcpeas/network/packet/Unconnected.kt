@@ -1,13 +1,10 @@
-@file:OptIn(ExperimentalStdlibApi::class)
-
 package me.elephant1214.mcpeas.network.packet
 
-import me.elephant1214.mcpeas.network.NetworkHandler.Companion.RAKNET_OFFLINE_MESSAGE_DATA
-import me.elephant1214.mcpeas.network.NetworkHandler.Companion.getMtuSize
+import me.elephant1214.mcpeas.network.NetworkHandler.RAKNET_OFFLINE_MESSAGE_DATA
 import me.elephant1214.mcpeas.server.Server
-import me.elephant1214.mcpeas.server.Server.Companion.GUID
-import me.elephant1214.mcpeas.server.Server.Companion.PROTOCOL_VERSION
-import me.elephant1214.mcpeas.server.Server.Companion.SERVER_SECURITY
+import me.elephant1214.mcpeas.server.Server.GUID
+import me.elephant1214.mcpeas.server.Server.PROTOCOL_VERSION
+import me.elephant1214.mcpeas.server.Server.SERVER_SECURITY
 import me.elephant1214.mcpeas.utils.ByteBufferUtil
 import java.net.InetSocketAddress
 
@@ -63,11 +60,11 @@ class S2COpenConnectionReply1Packet : Packet(0x06, 28) {
         bufUtil.writeMagic()
         bufUtil.writeLong(GUID)
         bufUtil.writeByte(SERVER_SECURITY)
-        bufUtil.writeShort(getMtuSize())
+        bufUtil.writeShort(Server.settings.mtuSize)
     }
 
     override fun toString(): String {
-        return "S2COpenConnectionReply1Packet(${RAKNET_OFFLINE_MESSAGE_DATA.toHexString()}, $GUID, $SERVER_SECURITY, ${getMtuSize()})"
+        return "S2COpenConnectionReply1Packet(${RAKNET_OFFLINE_MESSAGE_DATA.toHexString()}, $GUID, $SERVER_SECURITY, ${Server.settings.mtuSize})"
     }
 }
 
@@ -95,12 +92,12 @@ class S2COpenConnectionReply2Packet(
         bufUtil.writeMagic()
         bufUtil.writeLong(GUID)
         bufUtil.writeShort(clientPort)
-        bufUtil.writeShort(getMtuSize())
+        bufUtil.writeShort(Server.settings.mtuSize)
         bufUtil.writeByte(SERVER_SECURITY)
     }
 
     override fun toString(): String {
-        return "S2COpenConnectionReply2Packet(${RAKNET_OFFLINE_MESSAGE_DATA.toHexString()}, $GUID, $clientPort, ${getMtuSize()}, $SERVER_SECURITY)"
+        return "S2COpenConnectionReply2Packet(${RAKNET_OFFLINE_MESSAGE_DATA.toHexString()}, $GUID, $clientPort, ${Server.settings.mtuSize}, $SERVER_SECURITY)"
     }
 }
 

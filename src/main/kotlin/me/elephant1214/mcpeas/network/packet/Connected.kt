@@ -1,10 +1,10 @@
 package me.elephant1214.mcpeas.network.packet
 
-import me.elephant1214.mcpeas.network.NetworkHandler
 import me.elephant1214.mcpeas.server.ConnectedClient
+import me.elephant1214.mcpeas.server.Server
 import me.elephant1214.mcpeas.utils.ByteBufferUtil
 
-open class ConnectedPacket(id: Byte, size: Int = NetworkHandler.getMtuSize().toInt()) : Packet(id) {
+open class ConnectedPacket(id: Byte, size: Int = Server.settings.mtuSize.toInt()) : Packet(id) {
     open fun handle(client: ConnectedClient) {
     }
 }

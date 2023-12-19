@@ -1,6 +1,6 @@
 package me.elephant1214.mcpeas.utils
 
-import me.elephant1214.mcpeas.network.NetworkHandler.Companion.RAKNET_OFFLINE_MESSAGE_DATA
+import me.elephant1214.mcpeas.network.NetworkHandler.RAKNET_OFFLINE_MESSAGE_DATA
 import java.io.EOFException
 import java.lang.IllegalStateException
 import java.net.InetAddress

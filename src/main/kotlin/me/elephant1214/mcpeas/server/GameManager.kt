@@ -7,13 +7,12 @@ import me.elephant1214.mcpeas.world.entity.registerEntityTypes
 import me.elephant1214.mcpeas.world.generation.FlatGenerator
 import kotlin.properties.Delegates.notNull
 
-class GameManager {
-    val networkHandler = Server.networkHandler
+object GameManager {
     val players = ArrayList<PlayerEntity>()
     var mainWorld: World by notNull()
         private set
 
-    init {
+    internal fun init() {
         registerBlocks()
         registerEntityTypes()
 

@@ -7,12 +7,9 @@ class Location(
     private var pitch: Double = 0.0,
     private var yaw: Double = 0.0
 ) {
-    fun getDirection() {}
+    constructor() : this(0.0, 0.0, 0.0, 0.0, 0.0)
 
-    companion object {
-        @JvmStatic
-        fun zero(): Location = Location(0.0, 0.0, 0.0)
-    }
+    fun getDirection() {}
 }
 
 class ChunkLocation(private var x: Int, private var z: Int) {

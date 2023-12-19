@@ -4,7 +4,7 @@ import me.elephant1214.mcpeas.utils.Location
 import me.elephant1214.mcpeas.world.entity.Entity
 import java.util.*
 
-interface IWorldProvider {
+interface WorldProvider {
     fun tick()
 
     fun generateChunkColumn(chunkKey: Long)

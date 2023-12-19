@@ -2,7 +2,6 @@ package me.elephant1214.mcpeas.world.entity
 
 import me.elephant1214.mcpeas.registry.ENTITY_TYPE_REGISTRY
 import me.elephant1214.mcpeas.world.GameElementInfo
-import me.elephant1214.mcpeas.world.entity.type.EntityType
 
 fun registerEntityTypes() {
     ENTITY_TYPE_REGISTRY.register(GameElementInfo(0, "player"), EntityType())

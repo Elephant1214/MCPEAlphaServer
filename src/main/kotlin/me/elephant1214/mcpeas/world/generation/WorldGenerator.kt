@@ -1,5 +1,5 @@
 package me.elephant1214.mcpeas.world.generation
 
-interface IWorldGenerator {
+interface WorldGenerator {
     fun generateChunkColumn(chunkKey: Long)
 }
