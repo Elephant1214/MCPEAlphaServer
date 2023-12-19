@@ -1,5 +1,5 @@
 # MCPE Alpha Server
-A server for the MCPE Alpha. 0.14.3 is planned as the first supported version with eventual expansion to multiple versions.
+A server for MCPE Alpha. 0.14.3 is planned as the first supported version with eventual expansion to multiple versions.
 
 ### Resources
 Along with looking at (very old) source from various servers that already exist:
