@@ -1,5 +1,8 @@
-package me.elephant1214.mcpeas.network.packet
+@file:Suppress("MagicNumber")
 
+package me.elephant1214.mcpeas.network.protocol
+
+import me.elephant1214.mcpeas.network.Packet
 import me.elephant1214.mcpeas.server.ConnectedClient
 import me.elephant1214.mcpeas.server.Server
 import me.elephant1214.mcpeas.utils.ByteBufferUtil
@@ -18,7 +21,7 @@ class TWAckNak : ConnectedPacket(0xC0.toByte(), 10) {
         val count = bufUtil.readShort()
         for (i in 0 until count) {
             val oneSequence = bufUtil.readByte()
-            if (oneSequence == 0.toByte()) {
+            if (oneSequence == i.toByte()) {
                 val start = bufUtil.readInt24()
                 var end = bufUtil.readInt24()
                 if (end - start > 512) end = start + 512

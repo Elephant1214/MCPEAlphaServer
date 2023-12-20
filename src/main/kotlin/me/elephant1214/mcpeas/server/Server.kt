@@ -6,7 +6,6 @@ import kotlin.random.Random
 object Server {
     const val SERVER_SECURITY: Byte = 0 // Always a byte value of 0 (false)
     const val MAXIMUM_MTU_SIZE: Short = 1500
-    const val PROTOCOL_VERSION: Byte = 70
     const val GAME_VERSION = "0.14.3"
 
     val settings = ServerSettings()

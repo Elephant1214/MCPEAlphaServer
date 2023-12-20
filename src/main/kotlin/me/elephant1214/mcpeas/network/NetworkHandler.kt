@@ -1,6 +1,6 @@
 package me.elephant1214.mcpeas.network
 
-import me.elephant1214.mcpeas.network.packet.*
+import me.elephant1214.mcpeas.network.protocol.*
 import me.elephant1214.mcpeas.server.ConnectedClient
 import me.elephant1214.mcpeas.server.GameManager
 import me.elephant1214.mcpeas.server.Server
@@ -25,7 +25,10 @@ object NetworkHandler {
         val buffer = ByteBuffer.allocate(Server.settings.mtuSize.toInt())
         val socketAddress: SocketAddress = listenSocket.receive(buffer) ?: return
         if (socketAddress !is InetSocketAddress) {
-            println("Received an untrusted socket address with no port. Aborting handle because we don't know where to send response packets.")
+            println(
+                "Received an untrusted socket address with no port. Aborting handle because we don't know where " +
+                        "to send response packets."
+            )
             return
         }
 
@@ -38,10 +41,12 @@ object NetworkHandler {
     }
 
     private fun handleUnconnected(socketAddress: InetSocketAddress, buffer: ByteBuffer) {
-        when (val unconnectedPacket = Packet.unconnectedPacketOf(buffer[0])) {
+        when (val unconnectedPacket = unconnectedPacketOf(buffer[0])) {
             is C2SUnconnectedPingPacket -> {
-                val packet =
-                    S2CUnconnectedPongPacket("MCPE;Test Server;${Server.PROTOCOL_VERSION};${Server.GAME_VERSION};${connectedClients.size};${Server.settings.playerLimit}")
+                val packet = S2CUnconnectedPongPacket(
+                    "MCPE;Test Server;70;${Server.GAME_VERSION}" +
+                            ";${connectedClients.size};${Server.settings.playerLimit}"
+                )
                 this.sendPacket(
                     socketAddress, packet, packet.size
                 )
@@ -49,8 +54,8 @@ object NetworkHandler {
 
             is C2SOpenConnectionRequest1Packet -> {
                 unconnectedPacket.read(ByteBufferUtil(buffer))
-                if (unconnectedPacket.protocolVersion != Server.PROTOCOL_VERSION) {
-                    // handleIncorrectProtocolVersion(socketAddress) // Don't use for now
+                if (unconnectedPacket.protocolVersion != PROTOCOL_VERSION) {
+                    handleIncorrectProtocolVersion(socketAddress)
                 }
                 val packet = S2COpenConnectionReply1Packet()
                 this.sendPacket(socketAddress, packet, packet.size)
@@ -68,6 +73,10 @@ object NetworkHandler {
         }
     }
 
+    fun sendBuffer(socketAddress: InetSocketAddress, buffer: ByteBuffer) {
+        listenSocket.send(buffer, socketAddress)
+    }
+
     fun sendPacket(socketAddress: InetSocketAddress, packet: Packet, size: Int) {
         val writer = ByteBufferUtil(size)
         packet.write(writer)
@@ -76,30 +85,38 @@ object NetworkHandler {
         listenSocket.send(finalBuf, socketAddress)
     }
 
-    // private fun handleIncorrectProtocolVersion(socketAddress: SocketAddress) {
-    //     val packet = S2CIncompatibleProtocolVersion()
-    //     val writer = ByteBufferUtil(26)
-    //     packet.write(writer)
-    //     val buffer = writer.readAll()
-    //     handleSend(listenSocket, socketAddress, buffer)
-    // }
+    private fun handleIncorrectProtocolVersion(socketAddress: InetSocketAddress) {
+        val packet = S2CIncompatibleProtocolPacket()
+        val writer = ByteBufferUtil(packet.size)
+        packet.write(writer)
+        sendPacket(socketAddress, packet, packet.size)
+    }
 
+    /**
+     * RakNet's offline message data, or RakNet magic
+     */
+    @Suppress("MagicNumber")
     val RAKNET_OFFLINE_MESSAGE_DATA = byteArrayOf(
         0x00,
-        0xff.toByte(),
-        0xff.toByte(),
+        0xFF.toByte(),
+        0xFF.toByte(),
         0x00,
-        0xfe.toByte(),
-        0xfe.toByte(),
-        0xfe.toByte(),
-        0xfe.toByte(),
-        0xfd.toByte(),
-        0xfd.toByte(),
-        0xfd.toByte(),
-        0xfd.toByte(),
+        0xFE.toByte(),
+        0xFE.toByte(),
+        0xFE.toByte(),
+        0xFE.toByte(),
+        0xFD.toByte(),
+        0xFD.toByte(),
+        0xFD.toByte(),
+        0xFD.toByte(),
         0x12,
         0x34,
         0x56,
         0x78
     )
+
+    /**
+     * Supported *RakNet* protocol version
+     */
+    const val PROTOCOL_VERSION: Byte = 7
 }

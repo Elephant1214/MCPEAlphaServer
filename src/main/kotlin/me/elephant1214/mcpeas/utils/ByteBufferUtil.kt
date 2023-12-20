@@ -2,14 +2,14 @@ package me.elephant1214.mcpeas.utils
 
 import me.elephant1214.mcpeas.network.NetworkHandler.RAKNET_OFFLINE_MESSAGE_DATA
 import java.io.EOFException
-import java.lang.IllegalStateException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
-class ByteBufferUtil(private val stream: ByteBuffer) {
+@Suppress("MagicNumber", "TooManyFunctions")
+class ByteBufferUtil(private val buffer: ByteBuffer) {
 
     constructor(bufferSize: Int) : this(ByteBuffer.allocate(bufferSize))
 
@@ -20,84 +20,98 @@ class ByteBufferUtil(private val stream: ByteBuffer) {
             Float::class.java -> 4
             Long::class.java -> 8
             Double::class.java -> 8
-            else -> throw IllegalArgumentException("${clazzIn.javaClass.name} is not supported")
+            else -> error("${clazzIn.javaClass.name} is not supported")
         }
         val span = ByteArray(size)
-        if (stream.remaining() < size) throw EOFException()
-        stream.get(span)
+        if (buffer.remaining() < size) throw EOFException()
+        buffer.get(span)
         return span
     }
 
     fun read(length: Int): ByteArray {
         val memory = ByteArray(length)
-        if (stream.remaining() < length) throw EOFException()
-        stream.get(memory)
+        if (buffer.remaining() < length) throw EOFException()
+        buffer.get(memory)
         return memory
     }
 
-    fun readAll(): ByteArray = stream.array()
+    fun readAll(): ByteArray = buffer.array()
 
-    fun getStream(): ByteBuffer = stream
+    fun getBuffer(): ByteBuffer = buffer
 
     fun write(data: ByteArray) {
-        stream.put(data)
+        buffer.put(data)
     }
 
-    fun readByte(): Byte = stream.get()
+    fun readByte(): Byte = buffer.get()
 
     fun writeByte(value: Byte) {
-        stream.put(value)
+        buffer.put(value)
     }
 
     fun readShort(): Short = ByteBuffer.wrap(get(Short::class.java)).order(ByteOrder.BIG_ENDIAN).getShort()
 
     fun writeShort(value: Short) {
-        stream.putShort(value)
-        // stream.put(ByteBuffer.allocate(Short.SIZE_BYTES).putShort(value).order(ByteOrder.BIG_ENDIAN))
+        buffer.putShort(value)
     }
 
     fun readInt(): Int = ByteBuffer.wrap(get(Int::class.java)).order(ByteOrder.BIG_ENDIAN).getInt()
 
     fun writeInt(value: Int) {
-        stream.putInt(value)
-        // stream.put(ByteBuffer.allocate(Int.SIZE_BYTES).putInt(value).order(ByteOrder.BIG_ENDIAN))
+        buffer.putInt(value)
     }
 
     fun readLong(): Long = ByteBuffer.wrap(get(Long::class.java)).order(ByteOrder.BIG_ENDIAN).getLong()
 
     fun writeLong(value: Long) {
-        stream.putLong(value)
-        // stream.put(ByteBuffer.allocate(Long.SIZE_BYTES).putLong(value).order(ByteOrder.BIG_ENDIAN))
+        buffer.putLong(value)
     }
 
     fun readFloat(): Float = ByteBuffer.wrap(get(Float::class.java)).order(ByteOrder.BIG_ENDIAN).getFloat()
 
     fun writeFloat(value: Float) {
-        stream.putFloat(value)
-        // stream.put(ByteBuffer.allocate(Float.SIZE_BYTES).putFloat(value).order(ByteOrder.BIG_ENDIAN))
+        buffer.putFloat(value)
     }
 
     fun readDouble(): Double = ByteBuffer.wrap(get(Double::class.java)).order(ByteOrder.BIG_ENDIAN).getDouble()
 
     fun writeDouble(value: Double) {
-        stream.putDouble(value)
-        // stream.put(ByteBuffer.allocate(Double.SIZE_BYTES).putDouble(value).order(ByteOrder.BIG_ENDIAN))
+        buffer.putDouble(value)
     }
 
+    /**
+     * Triad, which is just a 24-bit (3 byte) integer
+     */
     fun readInt24(): Int {
-        val byte1 = readByte().toInt() and 0xFF
-        val byte2 = readByte().toInt() and 0xFF
-        val byte3 = readByte().toInt() and 0xFF
-        return (byte1 shl 16) or (byte2 shl 8) or byte3
+        var int24 = 0L
+        for (i in 0 until 3) {
+            int24 = (int24 shl 8) + (readByte().toInt() and 0xFF)
+        }
+        return int24.toInt()
     }
 
-    fun readRemaining(): ByteArray = read(stream.remaining())
+    /**
+     * Triad, which is just a 24-bit (3 byte) integer
+     */
+    fun writeInt24(value: Int) {
+        require(value > UINT_24_MIN || value < UINT_24_MAX) {
+            "$value is not within the range of an unsigned 24-bit integer." +
+                    "Must be between $UINT_24_MIN and $UINT_24_MAX"
+        }
+        val buffer = ByteArray(3)
+        buffer[2] = ((value shr 16) and 0xFF).toByte()
+        buffer[1] = ((value shr 8) and 0xFF).toByte()
+        buffer[0] = (value and 0xFF).toByte()
+        this.buffer.put(buffer)
+    }
+
+    fun readRemaining(): ByteArray = read(buffer.remaining())
 
     fun readString(): String {
         val length = readShort()
         val bytes = ByteArray(length.toInt())
-        if (stream.remaining() < length) throw EOFException()
-        stream.get(bytes)
+        if (buffer.remaining() < length) throw EOFException()
+        buffer.get(bytes)
         return String(bytes, StandardCharsets.UTF_8)
     }
 
@@ -107,21 +121,18 @@ class ByteBufferUtil(private val stream: ByteBuffer) {
         write(bytes)
     }
 
-    fun readTriad(): Int {
-        val byte1 = stream.get().toUByte().toInt()
-        val byte2 = stream.get().toUByte().toInt() shl 8
-        val byte3 = stream.get().toUByte().toInt() shl 16
-        return byte1 or byte2 or byte3
-    }
-
     fun readSocketAddress(): InetSocketAddress {
-        val ipVersion = readByte().toInt();
+        val ipVersion = readByte().toInt()
         val port: Int
         val socket: InetSocketAddress
 
         when (ipVersion) {
             4 -> {
-                val address = "${readByte().toUByte().toInt()}.${readByte().toUByte().toInt()}.${readByte().toUByte().toInt()}.${readByte().toUByte().toInt()}"
+                val address = "${readByte().toUByte().toInt()}.${readByte().toUByte().toInt()}." + "${
+                    readByte().toUByte().toInt()
+                }.${
+                    readByte().toUByte().toInt()
+                }"
                 port = readShort().toInt()
                 socket = InetSocketAddress(address, port)
             }
@@ -135,7 +146,7 @@ class ByteBufferUtil(private val stream: ByteBuffer) {
             }
 
             else -> {
-                throw IllegalStateException("Got invalid IP version, IPv$ipVersion")
+                error("Got an Invalid IP version, IPv$ipVersion")
             }
         }
         return socket
@@ -153,15 +164,15 @@ class ByteBufferUtil(private val stream: ByteBuffer) {
     }
 
     fun skip(amount: Int) {
-        stream.position(stream.position() + amount)
+        buffer.position(buffer.position() + amount)
     }
 
     fun skipMagic() {
-        stream.position(stream.position() + 16)
+        buffer.position(buffer.position() + 16)
     }
 
     fun writeMagic() {
-        stream.put(RAKNET_OFFLINE_MESSAGE_DATA)
+        buffer.put(RAKNET_OFFLINE_MESSAGE_DATA)
     }
 
     fun readVector(): Vector3f {

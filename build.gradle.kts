@@ -4,6 +4,7 @@ val kotlin_version: String by project
 
 plugins {
     kotlin("jvm") version("1.9.21")
+    id("io.gitlab.arturbosch.detekt") version("1.23.3")
 }
 
 group = "me.elephant1214"
@@ -15,6 +16,12 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+}
+
+detekt {
+    toolVersion = "1.23.3"
+    config.setFrom(file("detekt.yml"))
+    buildUponDefaultConfig = true
 }
 
 tasks.withType<KotlinCompile>().all {

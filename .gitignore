@@ -34,3 +34,5 @@ out/
 
 ### VS Code ###
 .vscode/
+/mcpea_vtable.txt
+/detekt-baseline.xml

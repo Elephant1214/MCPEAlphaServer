@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package me.elephant1214.mcpeas.world.entity
 
 import me.elephant1214.mcpeas.registry.ENTITY_TYPE_REGISTRY

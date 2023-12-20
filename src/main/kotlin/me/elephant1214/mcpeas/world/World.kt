@@ -5,7 +5,9 @@ import me.elephant1214.mcpeas.world.entity.Entity
 import me.elephant1214.mcpeas.world.generation.WorldGenerator
 import java.util.*
 
-class World(private val id: UUID = UUID.randomUUID(), private val name: String, val generator: WorldGenerator) : WorldProvider {
+class World(
+    private val id: UUID = UUID.randomUUID(), private val name: String, val generator: WorldGenerator
+) : WorldProvider {
     private val entities = ArrayList<Entity>()
     private var time = 0
 

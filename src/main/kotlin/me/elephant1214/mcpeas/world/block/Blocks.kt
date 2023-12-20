@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package me.elephant1214.mcpeas.world.block
 
 import me.elephant1214.mcpeas.world.GameElementInfo
